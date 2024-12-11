@@ -14,13 +14,17 @@ func main() {
 	}
 
 	stones := parseInput(string(data))
-	blinks := 75 // Number of blinks to simulate
 
-	for i := 0; i < blinks; i++ {
-		stones = blink(stones)
+	// Part 1: 25 blinks
+	part1Stones := stones
+	for i := 0; i < 25; i++ {
+		part1Stones = blink(part1Stones)
 	}
+	fmt.Println("Part 1:", len(part1Stones))
 
-	fmt.Println(len(stones))
+	// Part 2: 75 blinks
+	part2Result := blinkXTimes(75)
+	fmt.Println("Part 2:", part2Result)
 }
 
 func parseInput(input string) []int {
@@ -48,4 +52,57 @@ func blink(stones []int) []int {
 		}
 	}
 	return newStones
+}
+
+func blinkXTimes(iterations int) int {
+	lines := readLinesToList()
+	if len(lines) == 0 || len(lines[0]) == 0 {
+		return 0
+	}
+
+	stones := make(map[int]int)
+	for _, stone := range lines[0] {
+		stones[stone]++
+	}
+
+	for i := 0; i < iterations; i++ {
+		newStones := make(map[int]int)
+		for rock, count := range stones {
+			blinkResults := blink([]int{rock})
+			for _, blinkResult := range blinkResults {
+				newStones[blinkResult] += count
+			}
+		}
+		stones = newStones
+	}
+
+	total := 0
+	for _, count := range stones {
+		total += count
+	}
+
+	return total
+}
+
+func readLinesToList() [][]int {
+	data, err := ioutil.ReadFile("input.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	lines := strings.Split(string(data), "\n")
+	var result [][]int
+	for _, line := range lines {
+		if line == "" {
+			continue
+		}
+		parts := strings.Fields(line)
+		var intParts []int
+		for _, part := range parts {
+			num, _ := strconv.Atoi(part)
+			intParts = append(intParts, num)
+		}
+		result = append(result, intParts)
+	}
+	return result
 }
